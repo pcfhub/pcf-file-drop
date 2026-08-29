@@ -58,11 +58,6 @@ default is the behaviour most people want, which is to show the preview.
 
 ## What canvas does not have
 
-The empty state's icon is an `<img>` resource read with
-`context.resources.getResource`. Whether that resolves in a canvas app is not
-something this control relies on: when the call fails, an inline SVG stands in
-and the control looks the same.
-
 `context.device.pickFile()` is available in canvas but rejects in a browser tab,
 where there is no device bridge. The control falls back to the browser's own
 file dialog without saying anything about it.

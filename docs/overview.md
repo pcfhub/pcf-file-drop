@@ -36,9 +36,9 @@ Model-driven forms and canvas apps both. It reads no column metadata it cannot
 do without, publishes no theme of its own, and degrades on any host without a
 device bridge — which is every browser tab.
 
-The one host-specific piece is the empty state's icon, which is an `<img>`
-resource read with `context.resources.getResource`. Where that does not resolve,
-an inline SVG stands in and the control looks the same.
+Nothing here is host-specific, including the empty state's icon: it is an inline
+`<svg>` drawn in the control's own markup, so it takes its colour from the form's
+theme like everything else, and there is no resource to load.
 :::
 
 ## The ceiling, before you install it

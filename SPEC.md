@@ -35,10 +35,32 @@ stating because it is the one field that reads like it means bytes: a size check
 written against bytes lets a file a thousand times too large through, and the
 failure surfaces as a save error rather than as a refusal.
 
-**`context.resources.getResource` is callback-style.** It is the only API on
-`context` that is — everything else asynchronous returns a promise — so code
+**An SVG behind `<img src>` cannot be themed by the page, and this control
+shipped with that bug.** Observed on a real model-driven form in dark mode,
+after the first version drew its empty-state icon as an `<img>` — a `.png`
+resource read with `getResource`, falling back to an inline-SVG *data URL*. An
+image referenced through `<img>` is rendered as an isolated document: it cannot
+see the embedding page's stylesheet, so `stroke="currentColor"` inside it
+resolves against its own `color`, which is black. A black document icon on a
+near-black form.
+
+The fix is not a different file format. It is to build the icon as an inline
+`<svg>` in the control's own DOM, where `currentColor` resolves against the same
+CSS custom property every other colour reads and the emblem follows the host's
+theme for free. The `<img>` resource and the `getResource` call went with it —
+there is nothing left to load.
+
+The tempting non-fix is a resource carrying its own
+`@media (prefers-color-scheme: dark)`, which *would* apply inside an `<img>`.
+It is the wrong signal for the same reason `applyTheme` does not use it: a
+model-driven app carries its own theme and the operating system's setting says
+nothing about it, so an OS-dark machine on a light app gets the dark icon.
+
+`context.resources.getResource` is worth one line even though nothing here calls
+it now: it is **callback-style**, the only API on `context` that is, so code
 written around it in the shape of the rest of the file gets `undefined` and no
-error.
+error. Promoted to the skill — `references/control-patterns.md`, under *Files
+and binary content*.
 
 ## Demo
 
@@ -54,13 +76,6 @@ column. No Web API, no navigation, no external service — which is also why
 
 ## Not verified
 
-- **Whether an `<img>` resource resolves in a canvas app.** The manifest schema
-  reference lists `code` as supported on both hosts while noting that its `html`
-  and `img` properties are not supported in canvas, which is about the `code`
-  element rather than about the `img` *resource* — the wording does not settle
-  it. The control falls back to an inline SVG when `getResource` fails, so the
-  outcome is cosmetic either way, but the claim is untested. Proving it needs the
-  control on a canvas app with the placeholder path instrumented.
 - **The `pending` guard against a write that never round-trips.** While a write
   is in flight the control ignores `parameters.value.raw`, because adopting it
   would drop the file the user just added (the platform renders once with the old

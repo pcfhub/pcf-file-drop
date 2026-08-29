@@ -39,8 +39,7 @@
     ],
     "limitations": [
       "The Browse button calls context.device.pickFile() first, and the demo sandbox has no device bridge behind its origin, so that call always rejects. What you see instead is the control's fallback — the browser's own file dialog — which is also what a desktop browser does, so the path is real even though the platform call behind it is not.",
-      "Dropping a file, browsing for one, the size and type refusals, the image preview and Remove all work for real. Nothing in this control leaves the browser: the file is read with FileReader and written into the bound column, so there is no Web API, navigation or Dataverse call for the sandbox to stand in for.",
-      "The empty state’s icon is an <img> resource read with context.resources.getResource, which resolves on a model-driven form and not here. The inline SVG fallback is what the demo shows, and it is drawn to look the same."
+      "Dropping a file, browsing for one, the size and type refusals, the image preview and Remove all work for real. Nothing in this control leaves the browser: the file is read with FileReader and written into the bound column, so there is no Web API, navigation or Dataverse call for the sandbox to stand in for."
     ],
     "presets": [
       {

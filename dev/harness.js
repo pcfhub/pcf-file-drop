@@ -69,15 +69,6 @@
             },
 
             pickFile: document.getElementById('harness-pickfile').checked ? PICKED : null,
-
-            /*
-             * The `<img>` resource, which resolves on a model-driven form and
-             * is not something to count on elsewhere — so this page defaults to
-             * the failure, and the control's inline fallback is what shows.
-             */
-            resource: document.getElementById('harness-resource').checked
-                ? 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='
-                : null,
         };
     }
 
@@ -232,7 +223,6 @@
             'harness-maxsize',
             'harness-hidepreview',
             'harness-pickfile',
-            'harness-resource',
         ].forEach(function (id) {
             document.getElementById(id).addEventListener('change', render);
         });

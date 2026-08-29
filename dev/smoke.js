@@ -276,42 +276,47 @@ check(
 );
 
 /*
- * `getResource` is callback-style and its *failure* path is the default one in
- * `dev/host.js`, because an `<img>` resource is documented for model-driven
- * apps and this control runs on more hosts than that. The fallback has to be a
- * picture, not a broken image icon.
+ * **The emblem is an inline `<svg>`, and that is a theming decision.**
+ *
+ * The same markup behind an `<img src>` — a file resource or a data URL —
+ * renders in an isolated document that cannot see this control's stylesheet, so
+ * its `stroke="currentColor"` resolves to black and a dark form gets a black
+ * icon on a dark background. Inline, `currentColor` resolves against the CSS
+ * custom property every other colour in the control reads.
+ *
+ * Asserted on the element name because that is the whole of the fix: an
+ * `<img>` here would look identical in a light theme and wrong in a dark one,
+ * which is exactly the kind of regression a rendered screenshot does not catch.
  */
 check(
-    'falls back to an inline icon on a host where getResource fails',
-    empty.find('.FileDrop-icon').src.startsWith('data:image/svg+xml,'),
-    empty.find('.FileDrop-icon').src.slice(0, 40),
-);
-
-const withResource = drop({ value: null, resource: 'QUJD' });
-
-check(
-    'and uses the platform resource where it resolves',
-    withResource.find('.FileDrop-icon').src === 'data:image/png;base64,QUJD',
-    withResource.find('.FileDrop-icon').src,
+    'the empty state draws an inline svg, not an image',
+    empty.find('.FileDrop-emblem') && empty.find('.FileDrop-emblem').tagName.toLowerCase() === 'svg',
+    empty.find('.FileDrop-emblem') && empty.find('.FileDrop-emblem').tagName,
 );
 
 check(
-    'asking for it once, not once per render',
-    (() => {
-        const asked = drop({ value: null, resource: 'QUJD' });
-
-        asked.update({});
-        asked.update({});
-
-        return asked.tracked().filter((call) => String(call).startsWith('getResource:')).length === 1;
-    })(),
+    'stroked with currentColor, so the stylesheet decides the colour',
+    empty
+        .find('.FileDrop-emblem')
+        .querySelectorAll('path')
+        .every((path) => path.getAttribute('stroke') === 'currentColor'),
 );
 
 /*
- * The empty-state icon is decoration and must not be announced. A screen reader
- * that reads "image" before "Drop a file here" has added a word and no meaning.
+ * The emblem is decoration and must not be announced. A screen reader that
+ * reads "image" before "Drop a file here" has added a word and no meaning.
  */
-check('the empty-state icon is decorative', empty.find('.FileDrop-icon').alt === '');
+check(
+    'and hidden from the accessibility tree',
+    empty.find('.FileDrop-emblem').getAttribute('aria-hidden') === 'true',
+);
+
+/* The control loads no resource at all any more; nothing should ask for one. */
+check(
+    'asks the platform for no resource',
+    empty.tracked().filter((call) => String(call).startsWith('getResource:')).length === 0,
+    empty.tracked().join(' ') || 'nothing tracked',
+);
 
 /* ----------------------------------------------------------- filled state */
 
@@ -325,14 +330,15 @@ check(
 
 check(
     'and previews an image rather than describing it',
-    filled.find('.FileDrop-icon').src === PNG
-        && filled.find('.FileDrop-icon').classList.contains('FileDrop-icon--preview'),
+    filled.find('.FileDrop-preview').src === PNG
+        && filled.find('.FileDrop-preview').hidden === false
+        && filled.find('.FileDrop-emblem').getAttribute('hidden') !== null,
 );
 
 check(
-    'a preview is given a real alternative text, unlike the decorative icon',
-    filled.find('.FileDrop-icon').alt === 'resx:FileDrop_PreviewAlt',
-    filled.find('.FileDrop-icon').alt,
+    'a preview is given a real alternative text, unlike the decorative emblem',
+    filled.find('.FileDrop-preview').alt === 'resx:FileDrop_PreviewAlt',
+    filled.find('.FileDrop-preview').alt,
 );
 
 /*
@@ -350,7 +356,8 @@ check(
     (() => {
         const document_ = drop({ value: CSV, inputs: { fileName: 'expenses.csv' } });
 
-        return !document_.find('.FileDrop-icon').classList.contains('FileDrop-icon--preview')
+        return document_.find('.FileDrop-preview').hidden === true
+            && document_.find('.FileDrop-emblem').getAttribute('hidden') === null
             && document_.find('.FileDrop-detail').hidden === false;
     })(),
 );
@@ -364,14 +371,12 @@ check(
  */
 check(
     'previews by default, because the property is phrased so that false is the good default',
-    drop({ value: PNG }).find('.FileDrop-icon').classList.contains('FileDrop-icon--preview'),
+    drop({ value: PNG }).find('.FileDrop-preview').hidden === false,
 );
 
 check(
     'and stops previewing when the maker asks it to',
-    !drop({ value: PNG, inputs: { hidePreview: true } })
-        .find('.FileDrop-icon')
-        .classList.contains('FileDrop-icon--preview'),
+    drop({ value: PNG, inputs: { hidePreview: true } }).find('.FileDrop-preview').hidden === true,
 );
 
 /*

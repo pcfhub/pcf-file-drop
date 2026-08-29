@@ -90,18 +90,25 @@
       <code path="index.ts" order="1" />
       <css path="css/FileDrop.css" order="1" />
       <!--
-        The empty state's icon, read at runtime with
-        `context.resources.getString`'s neighbour, `getResource`.
+        NO `<img>` RESOURCE, AND THAT IS THE DECISION RATHER THAN AN OMISSION.
 
-        It is here as much to prove the path as to draw a picture: `getResource`
-        is callback-style rather than promise-based, it is the one resource API
-        a control is likely to need, and an `<img>` resource is documented as
-        model-driven. The control therefore falls back to an inline SVG when the
-        callback fails, which is the state every non-model-driven host is
-        expected to be in. See SPEC.md — whether canvas resolves this is
-        recorded there as unverified rather than guessed at here.
+        The empty state's icon is built as an inline `<svg>` in `index.ts`, not
+        loaded as a resource, because an image referenced through `<img src>` —
+        file or data URL alike — renders as an isolated document that cannot see
+        this control's stylesheet. Its `currentColor` resolves to black, which on
+        a dark form is a black icon on a dark background.
+
+        Inline, the same `stroke="currentColor"` resolves against the CSS custom
+        property every other colour here reads, so the emblem follows the host's
+        theme with no code and no second file to ship. Verified on a real
+        model-driven form in both themes.
+
+        A resource *could* self-theme with its own
+        `@media (prefers-color-scheme: dark)`, and that is the wrong signal: a
+        model-driven app carries its own theme and the operating system's
+        setting says nothing about it, which is exactly why `applyTheme` reads
+        `fluentDesignLanguage` instead.
       -->
-      <img path="img/placeholder.png" />
       <!--
         Every language the control ships.
 

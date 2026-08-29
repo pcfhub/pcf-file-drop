@@ -35,11 +35,6 @@ order: 7
   nothing is said about it — but it does mean the camera-roll behaviour is
   reachable only from the phone and tablet apps.
 
-- **The empty state's icon may not come from the solution.** It is an `<img>`
-  resource read with `context.resources.getResource`, which resolves on a
-  model-driven form; elsewhere an inline SVG stands in. The two are drawn to
-  look the same, so this is cosmetic.
-
 - **No thumbnailing, compression or conversion.** What is dropped is what is
   stored. A 4 MB photo from a phone camera is refused, not resized.
 

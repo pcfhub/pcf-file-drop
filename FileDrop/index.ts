@@ -36,7 +36,26 @@ const DEFAULT_MAX_SIZE_KB = 512;
 export class FileDrop implements ComponentFramework.StandardControl<IInputs, IOutputs> {
     private container!: HTMLDivElement;
     private zone!: HTMLDivElement;
-    private icon!: HTMLImageElement;
+    /**
+     * The document emblem, as an inline `<svg>` in this control's own DOM.
+     *
+     * **Inline is the whole point, and an `<img>` cannot do this job.** An SVG
+     * referenced through `<img src>` — file or data URL alike — is rendered as
+     * an isolated document: it cannot see this page's stylesheet, so a
+     * `stroke="currentColor"` inside it resolves against its own `color`, which
+     * is black. On a dark form that is a black icon on a dark background.
+     *
+     * The only way an `<img>`-loaded SVG could theme itself is its own
+     * `@media (prefers-color-scheme: dark)`, and that is the wrong signal —
+     * a model-driven app carries its own theme and the operating system's
+     * setting says nothing about it, which is the same reason `applyTheme`
+     * below reads `fluentDesignLanguage` instead. Inline, `currentColor`
+     * resolves against the CSS custom property every other colour here uses,
+     * and the emblem follows the host for free.
+     */
+    private emblem!: SVGSVGElement;
+    /** Only ever the file itself. The emblem above covers every other state. */
+    private preview!: HTMLImageElement;
     private prompt!: HTMLParagraphElement;
     private detail!: HTMLParagraphElement;
     private actions!: HTMLDivElement;
@@ -93,10 +112,6 @@ export class FileDrop implements ComponentFramework.StandardControl<IInputs, IOu
     /** The read in flight, which `destroy()` owes an `abort()`. */
     private reader: FileReader | null = null;
 
-    /** The placeholder, once the platform has handed it over. Asked for once. */
-    private placeholder: string | null = null;
-    private placeholderAsked = false;
-
     public init(
         context: ComponentFramework.Context<IInputs>,
         notifyOutputChanged: () => void,
@@ -107,11 +122,10 @@ export class FileDrop implements ComponentFramework.StandardControl<IInputs, IOu
         this.context = context;
         this.notifyOutputChanged = notifyOutputChanged;
 
-        this.icon = document.createElement('img');
-        this.icon.className = 'FileDrop-icon';
-        // Decorative in the empty state; given a real alt when it becomes a
-        // preview of an actual file.
-        this.icon.alt = '';
+        this.emblem = documentEmblem();
+
+        this.preview = document.createElement('img');
+        this.preview.className = 'FileDrop-preview';
 
         this.prompt = document.createElement('p');
         this.prompt.className = 'FileDrop-prompt';
@@ -151,7 +165,7 @@ export class FileDrop implements ComponentFramework.StandardControl<IInputs, IOu
 
         this.zone = document.createElement('div');
         this.zone.className = 'FileDrop-zone';
-        this.zone.append(this.icon, this.prompt, this.detail, this.actions, this.picker);
+        this.zone.append(this.emblem, this.preview, this.prompt, this.detail, this.actions, this.picker);
 
         /*
          * `dragover` must call `preventDefault()` or `drop` never fires at all.
@@ -245,7 +259,6 @@ export class FileDrop implements ComponentFramework.StandardControl<IInputs, IOu
 
         this.zone.hidden = false;
         this.adopt(context);
-        this.askForPlaceholder(context);
 
         const disabled =
             context.mode.isControlDisabled || (security !== undefined && !security.editable);
@@ -313,9 +326,7 @@ export class FileDrop implements ComponentFramework.StandardControl<IInputs, IOu
         const strings = context.resources;
 
         if (this.value === null) {
-            this.icon.src = this.placeholder ?? emptyIcon();
-            this.icon.alt = '';
-            this.icon.classList.remove('FileDrop-icon--preview');
+            this.showEmblem();
             this.prompt.textContent = strings.getString('FileDrop_Prompt');
             this.detail.hidden = true;
             this.remove.hidden = true;
@@ -338,9 +349,13 @@ export class FileDrop implements ComponentFramework.StandardControl<IInputs, IOu
          */
         const preview = !context.parameters.hidePreview.raw && isImage(this.value);
 
-        this.icon.src = preview ? this.value : (this.placeholder ?? emptyIcon());
-        this.icon.alt = preview ? strings.getString('FileDrop_PreviewAlt').replace('{0}', label) : '';
-        this.icon.classList.toggle('FileDrop-icon--preview', preview);
+        if (preview) {
+            this.preview.src = this.value;
+            this.preview.alt = strings.getString('FileDrop_PreviewAlt').replace('{0}', label);
+            this.showPreview();
+        } else {
+            this.showEmblem();
+        }
 
         this.prompt.textContent = label;
         this.detail.hidden = false;
@@ -351,34 +366,22 @@ export class FileDrop implements ComponentFramework.StandardControl<IInputs, IOu
         this.container.classList.add('FileDrop--filled');
     }
 
-    /**
-     * Ask the platform for the empty state's icon, once.
-     *
-     * `getResource` is callback-style rather than promise-based — the only API
-     * on `context` that is — so there is nothing to await and nothing returned;
-     * both outcomes arrive as a call. The failure path is the one that matters,
-     * because an `<img>` resource is documented for model-driven apps and this
-     * control runs on more hosts than that. When it fails, an inline SVG stands
-     * in and nothing about the control looks broken.
+    /*
+     * The two are mutually exclusive, and they are hidden by different means
+     * for one dull reason: `hidden` is an HTMLElement *property*, and an inline
+     * `<svg>` is an SVGElement, which does not have it. The *attribute* works on
+     * both — `[hidden]` is a plain attribute selector — so the emblem goes
+     * through `setAttribute`. Both are backed by the same `[hidden]` rules in
+     * the stylesheet, which the element's own `display` would otherwise outrank.
      */
-    private askForPlaceholder(context: ComponentFramework.Context<IInputs>): void {
-        if (this.placeholderAsked) {
-            return;
-        }
+    private showEmblem(): void {
+        this.emblem.removeAttribute('hidden');
+        this.preview.hidden = true;
+    }
 
-        this.placeholderAsked = true;
-
-        context.resources.getResource(
-            'img/placeholder.png',
-            (content: string) => {
-                this.placeholder = `data:image/png;base64,${content}`;
-                this.render(this.context);
-            },
-            () => {
-                // Not an error, and not worth a message: the inline fallback is
-                // already on screen and looks the same.
-            },
-        );
+    private showPreview(): void {
+        this.emblem.setAttribute('hidden', '');
+        this.preview.hidden = false;
     }
 
     /**
@@ -648,20 +651,54 @@ function accepts(accept: string, fileName: string, mimeType: string): boolean {
     });
 }
 
-/**
- * The empty state's icon when the platform did not hand one over.
- *
- * Inline rather than a second file, because the whole point of it is to be
- * available where `getResource` was not. A `<img src>` of an SVG data URL is
- * the one form that needs no extra element and no CSS.
- */
-function emptyIcon(): string {
-    const svg =
-        '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">'
-        + '<path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" '
-        + 'd="M28 6H12a2 2 0 0 0-2 2v32a2 2 0 0 0 2 2h24a2 2 0 0 0 2-2V16z"/>'
-        + '<path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" '
-        + 'd="M28 6v10h10"/></svg>';
+/** The SVG namespace. `createElement` produces an HTML element of the same name,
+ *  which renders nothing at all — the failure is silent and looks like CSS. */
+const SVG_NS = 'http://www.w3.org/2000/svg';
 
-    return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+/** A page with a folded corner: 48×48 on a 2px stroke, matching Fluent's line icons. */
+const EMBLEM_PATHS = [
+    'M28 6H12a2 2 0 0 0-2 2v32a2 2 0 0 0 2 2h24a2 2 0 0 0 2-2V16z',
+    'M28 6v10h10',
+];
+
+/**
+ * The document emblem, built as real elements rather than as a data URL.
+ *
+ * `stroke="currentColor"` is the reason for all of this: inline, it resolves
+ * against the `color` the stylesheet sets from the same custom property every
+ * other colour in the control reads, so the emblem follows the host's light and
+ * dark themes with no code. Through `<img src>` it would resolve inside an
+ * isolated document and come out black.
+ *
+ * Built with `createElementNS` because `createElement('svg')` makes an
+ * *HTML* element named "svg" — it parses, it appends, it occupies no space and
+ * draws nothing, which reads as a CSS problem for as long as you let it.
+ *
+ * Decorative: the empty state has its prompt and the filled state has the file
+ * name, so there is nothing here a screen reader should announce.
+ */
+function documentEmblem(): SVGSVGElement {
+    const svg = document.createElementNS(SVG_NS, 'svg') as SVGSVGElement;
+
+    // `classList` rather than `className`: on an SVG element `className` is a
+    // read-only SVGAnimatedString, and assigning to it silently does nothing.
+    svg.classList.add('FileDrop-emblem');
+    svg.setAttribute('viewBox', '0 0 48 48');
+    svg.setAttribute('aria-hidden', 'true');
+    // Legacy Edge put SVG in the tab order without this. It costs one attribute.
+    svg.setAttribute('focusable', 'false');
+
+    for (const d of EMBLEM_PATHS) {
+        const path = document.createElementNS(SVG_NS, 'path');
+
+        path.setAttribute('d', d);
+        path.setAttribute('fill', 'none');
+        path.setAttribute('stroke', 'currentColor');
+        path.setAttribute('stroke-width', '2');
+        path.setAttribute('stroke-linejoin', 'round');
+
+        svg.appendChild(path);
+    }
+
+    return svg;
 }
