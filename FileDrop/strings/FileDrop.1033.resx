@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!--
+    Display names and descriptions for everything declared in
+    ControlManifest.Input.xml. PCFHub reads the manifest, so these strings are
+    what appear in the component's API reference on the hub as well as in the
+    maker's properties pane.
+
+    Copy this file to add a language — FileDrop.3082.resx for Spanish, and so
+    on — then list it under <resources> in the manifest.
+  -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <data name="FileDrop_Name" xml:space="preserve">
+    <value>File Drop</value>
+  </data>
+  <data name="FileDrop_Desc" xml:space="preserve">
+    <value>Drop a file onto a form and keep it in the column.</value>
+  </data>
+  <data name="value_Name" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="value_Desc" xml:space="preserve">
+    <value>The column the file is kept in, as a data URL.</value>
+  </data>
+  <data name="fileName_Name" xml:space="preserve">
+    <value>File name</value>
+  </data>
+  <data name="fileName_Desc" xml:space="preserve">
+    <value>An optional second column holding the file's name.</value>
+  </data>
+  <data name="accept_Name" xml:space="preserve">
+    <value>Accepted types</value>
+  </data>
+  <data name="accept_Desc" xml:space="preserve">
+    <value>A comma-separated list of MIME types or extensions. Empty accepts anything.</value>
+  </data>
+  <data name="maxSizeKb_Name" xml:space="preserve">
+    <value>Maximum size (KB)</value>
+  </data>
+  <data name="maxSizeKb_Desc" xml:space="preserve">
+    <value>Files larger than this are refused. Defaults to 512.</value>
+  </data>
+  <data name="hidePreview_Name" xml:space="preserve">
+    <value>Hide preview</value>
+  </data>
+  <data name="hidePreview_Desc" xml:space="preserve">
+    <value>Show the file's name instead of a picture, even when the file is an image.</value>
+  </data>
+  <data name="FileDrop_NoAccess" xml:space="preserve">
+    <value>You do not have access to this value.</value>
+  </data>
+  <data name="FileDrop_Prompt" xml:space="preserve">
+    <value>Drop a file here</value>
+  </data>
+  <data name="FileDrop_Browse" xml:space="preserve">
+    <value>Browse</value>
+  </data>
+  <data name="FileDrop_Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="FileDrop_TooLarge" xml:space="preserve">
+    <value>That file is {0} KB. The limit is {1} KB.</value>
+  </data>
+  <data name="FileDrop_Unreadable" xml:space="preserve">
+    <value>That file could not be read.</value>
+  </data>
+  <data name="FileDrop_Rejected" xml:space="preserve">
+    <value>That kind of file is not accepted here.</value>
+  </data>
+  <data name="FileDrop_Unnamed" xml:space="preserve">
+    <value>Unnamed file</value>
+  </data>
+  <data name="FileDrop_Size" xml:space="preserve">
+    <value>{0} KB</value>
+  </data>
+  <data name="FileDrop_PreviewAlt" xml:space="preserve">
+    <value>Preview of {0}</value>
+  </data>
+</root>

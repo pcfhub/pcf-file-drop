@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "slug": "pcf-file-drop",
+  "name": "File Drop",
+  "tagline": "Drop a file onto a form and keep it in the column.",
+  "category": "input",
+  "tags": [
+    "file",
+    "upload",
+    "drag-and-drop",
+    "device",
+    "base64",
+    "no-react"
+  ],
+  "control": {
+    "namespace": "PCFHub",
+    "constructor": "FileDrop",
+    "type": "field",
+    "framework": "standard",
+    "manifestPath": "FileDrop/ControlManifest.Input.xml"
+  },
+  "links": {
+    "homepage": "https://github.com/pcfhub/pcf-file-drop",
+    "support": "https://github.com/pcfhub/pcf-file-drop/issues",
+    "license": "MIT"
+  },
+  "docs": {
+    "path": "docs"
+  },
+  "media": {
+    "logo": "media/logo.png",
+    "screenshots": []
+  },
+  "demo": {
+    "fidelity": "limited",
+    "bundle": "out/controls/FileDrop/bundle.js",
+    "styles": [
+      "out/controls/FileDrop/css/FileDrop.css"
+    ],
+    "limitations": [
+      "The Browse button calls context.device.pickFile() first, and the demo sandbox has no device bridge behind its origin, so that call always rejects. What you see instead is the control's fallback — the browser's own file dialog — which is also what a desktop browser does, so the path is real even though the platform call behind it is not.",
+      "Dropping a file, browsing for one, the size and type refusals, the image preview and Remove all work for real. Nothing in this control leaves the browser: the file is read with FileReader and written into the bound column, so there is no Web API, navigation or Dataverse call for the sandbox to stand in for.",
+      "The empty state’s icon is an <img> resource read with context.resources.getResource, which resolves on a model-driven form and not here. The inline SVG fallback is what the demo shows, and it is drawn to look the same."
+    ],
+    "presets": [
+      {
+        "slug": "empty",
+        "name": "Nothing yet",
+        "description": "The empty column, which is the state that invites a drop. Drag a file onto it, or press Browse.",
+        "props": {
+          "value": null,
+          "fileName": null,
+          "accept": "",
+          "maxSizeKb": 512,
+          "hidePreview": false
+        },
+        "isDefault": true
+      },
+      {
+        "slug": "image",
+        "name": "An image",
+        "description": "A picture in the column, shown as a preview. The size beneath it is read back out of the data URL rather than remembered.",
+        "props": {
+          "value": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAABQCAYAAADSm7GJAAABtUlEQVR42u3aV04WUBSFUWYgIiIiImLvXafC33tnOiIiIiIi9t51bMfITe4EfDCatZNvBOt1j+1Z+hm/G1/6EeOj1N7R99zE6FtMDFP7hl9zk8MvMTlI7R98zk0NPsVUP3Wg/zE33f8Q073Uwd773EzvXcx0U4e6b3Oz3Tcx20kd7rzOzXVexVw7daT9MjfffhHzrdTR1vPcQutZLDRTx5pPdzve3Ek1duJE40nuZGM7Vd+OU/XHudP1rVRtK87UHuXO1jZT1c04V32YO1/dSFU24kLlQe5iZT1VXo9L5fu5y+W1VGktrpTu5a6WVlPF1bhWvJu7XlxJFVbiRuFO7mZhObW4HLcWb+82BhgwYMCAAQMGDBgwYMCAAQMGDBgwYMCAAQMGDBgwYMCAAQMGDBgwYMCAAQMGDBgwYMCAAQMGDBgwYMCAAf8xsP3dAQYMGDBgwAbYABtgAwwYMGDAgAEDNsAG2AADBgwYMGDAgO3/Ana686oEDBgwYMCAAQMGDBgwYMCAAQMGDBgwYMCAAQMGDBgwYMCAAQMGDBgwYMCAAQMGDBgwYMCAAQMGDBgwYMD/OPAvdSstkrSCF5EAAAAASUVORK5CYII=",
+          "fileName": "receipt.png",
+          "accept": "",
+          "maxSizeKb": 512,
+          "hidePreview": false
+        }
+      },
+      {
+        "slug": "document",
+        "name": "Not an image",
+        "description": "A CSV in the same column. There is nothing to preview, so the name and size are the whole of it.",
+        "props": {
+          "value": "data:text/csv;base64,RGF0ZSxNZXJjaGFudCxBbW91bnQKMjAyNi0wOC0wNCxOb3J0aHdpbmQgVHJhZGVycywxMjguNDAKMjAyNi0wOC0xMSxDb250b3NvIExvZ2lzdGljcyw2NC4wMAoyMDI2LTA4LTE5LEZhYnJpa2FtLDIxMi43NQo=",
+          "fileName": "expenses.csv",
+          "accept": "",
+          "maxSizeKb": 512,
+          "hidePreview": false
+        }
+      },
+      {
+        "slug": "no-preview",
+        "name": "Preview switched off",
+        "description": "The same image with hidePreview set — the property is phrased backwards on purpose, because a TwoOptions input cannot express \"unset\".",
+        "props": {
+          "value": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAABQCAYAAADSm7GJAAABtUlEQVR42u3aV04WUBSFUWYgIiIiImLvXafC33tnOiIiIiIi9t51bMfITe4EfDCatZNvBOt1j+1Z+hm/G1/6EeOj1N7R99zE6FtMDFP7hl9zk8MvMTlI7R98zk0NPsVUP3Wg/zE33f8Q073Uwd773EzvXcx0U4e6b3Oz3Tcx20kd7rzOzXVexVw7daT9MjfffhHzrdTR1vPcQutZLDRTx5pPdzve3Ek1duJE40nuZGM7Vd+OU/XHudP1rVRtK87UHuXO1jZT1c04V32YO1/dSFU24kLlQe5iZT1VXo9L5fu5y+W1VGktrpTu5a6WVlPF1bhWvJu7XlxJFVbiRuFO7mZhObW4HLcWb+82BhgwYMCAAQMGDBgwYMCAAQMGDBgwYMCAAQMGDBgwYMCAAQMGDBgwYMCAAQMGDBgwYMCAAQMGDBgwYMCAAf8xsP3dAQYMGDBgwAbYABtgAwwYMGDAgAEDNsAG2AADBgwYMGDAgO3/Ana686oEDBgwYMCAAQMGDBgwYMCAAQMGDBgwYMCAAQMGDBgwYMCAAQMGDBgwYMCAAQMGDBgwYMCAAQMGDBgwYMD/OPAvdSstkrSCF5EAAAAASUVORK5CYII=",
+          "fileName": "receipt.png",
+          "accept": "",
+          "maxSizeKb": 512,
+          "hidePreview": true
+        }
+      },
+      {
+        "slug": "restricted",
+        "name": "Images only, 8 KB",
+        "description": "A narrow rule and a small limit, so both refusals are reachable: drop a document to see the type refused, drop a large picture to see the size refused.",
+        "props": {
+          "value": null,
+          "fileName": null,
+          "accept": "image/*",
+          "maxSizeKb": 8,
+          "hidePreview": false
+        }
+      }
+    ]
+  }
+}

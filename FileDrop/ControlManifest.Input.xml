@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<manifest>
+  <!--
+    The version here is what the Power Platform upgrades on, and the release
+    workflow refuses to publish a tag that disagrees with it. Bump this in the
+    same commit as the tag.
+  -->
+  <control namespace="PCFHub"
+           constructor="FileDrop"
+           version="0.1.0"
+           display-name-key="FileDrop_Name"
+           description-key="FileDrop_Desc"
+           control-type="standard">
+
+    <!--
+      Nothing leaves the browser. The file is read with FileReader and written
+      into the column the control is bound to; there is no upload, no endpoint,
+      and no third-party service — so this stays disabled and the control stays
+      out of the premium bucket.
+    -->
+    <external-service-usage enabled="false" />
+
+    <!--
+      WHY THIS IS A TEXT COLUMN AND NOT A FILE COLUMN.
+
+      It reads like a workaround and it is not one: PCF cannot bind a File
+      column at all. The manifest schema reference says so outright under the
+      `type` element — "At this time File columns are not supported" — and
+      `ImageObject` is documented as canvas-only. There is no `of-type="File"`
+      to reach for, and `context.webAPI` has five methods, none of which can
+      PATCH a file attribute.
+
+      So the file lives in the column as a data URL, which is the same shape
+      Microsoft's own ImageUploadControl sample uses. A data URL rather than
+      bare base64 for one concrete reason: a canvas `Image` control can bind
+      this column directly, with nothing in between.
+
+      The cost is a real ceiling. `Multiple` holds 1,048,576 characters and
+      base64 costs a third on top, so the largest file that fits is about
+      768 KB — before whatever the maker set the column's own MaxLength to.
+      `maxSizeKb` below is what keeps the control from writing a value the
+      platform will reject on save, which is a much worse failure than a
+      refusal up front.
+    -->
+    <property name="value"
+              display-name-key="value_Name"
+              description-key="value_Desc"
+              of-type="Multiple"
+              usage="bound"
+              required="true" />
+
+    <!--
+      Optional second column, and the reason it exists: a data URL carries the
+      MIME type and not the name. Bound rather than output-only so the name
+      survives a reload — an output property is written to whatever the maker
+      wired it to and read back from nothing.
+
+      A maker who binds only `value` gets a control that works and forgets what
+      the file was called. That is a fair trade to offer rather than to force.
+    -->
+    <property name="fileName"
+              display-name-key="fileName_Name"
+              description-key="fileName_Desc"
+              of-type="SingleLine.Text"
+              usage="bound"
+              required="false" />
+
+    <property name="accept"
+              display-name-key="accept_Name"
+              description-key="accept_Desc"
+              of-type="SingleLine.Text"
+              usage="input"
+              required="false" />
+
+    <property name="maxSizeKb"
+              display-name-key="maxSizeKb_Name"
+              description-key="maxSizeKb_Desc"
+              of-type="Whole.None"
+              usage="input"
+              required="false" />
+
+    <property name="hidePreview"
+              display-name-key="hidePreview_Name"
+              description-key="hidePreview_Desc"
+              of-type="TwoOptions"
+              usage="input"
+              required="false" />
+
+    <resources>
+      <code path="index.ts" order="1" />
+      <css path="css/FileDrop.css" order="1" />
+      <!--
+        The empty state's icon, read at runtime with
+        `context.resources.getString`'s neighbour, `getResource`.
+
+        It is here as much to prove the path as to draw a picture: `getResource`
+        is callback-style rather than promise-based, it is the one resource API
+        a control is likely to need, and an `<img>` resource is documented as
+        model-driven. The control therefore falls back to an inline SVG when the
+        callback fails, which is the state every non-model-driven host is
+        expected to be in. See SPEC.md — whether canvas resolves this is
+        recorded there as unverified rather than guessed at here.
+      -->
+      <img path="img/placeholder.png" />
+      <!--
+        Every language the control ships.
+
+        A .resx that exists on disk but is not listed here is not shipped, and
+        nothing warns — the file is simply never packed, and the control runs
+        in English for that locale while the repository looks translated.
+        `npm run check` catches both that and a key missing from a language.
+
+        Drop the ones you will not maintain. A stale translation is worse than
+        an honest fallback to English, and every key added to 1033 is a key
+        owed to each file listed here.
+
+        THE ORDER IS DELIBERATE AND 1033 GOES LAST. `pcf-start` picks the .resx
+        by manifest order rather than by locale: it reads whichever file is
+        listed *last* and ignores the LCID and the browser language entirely.
+        The platform itself ignores the order completely — a real app resolves
+        from the user's provisioned language — so `npm start` is the only thing
+        in the world that reads this order, and it is ordered for it. Listing
+        1033 first is the tidier-looking arrangement and it makes `npm start`
+        render the whole control in Japanese, which reads as a broken build.
+
+        The consequence to remember: ADD A NEW LANGUAGE ABOVE THIS LINE, not
+        below it. Appending a sixth file after 1033 silently moves the harness
+        to that language, and the symptom shows up in a `npm start` session
+        nobody connects to a manifest edit.
+      -->
+      <resx path="strings/FileDrop.3082.resx" version="1.0.0" />
+      <resx path="strings/FileDrop.1036.resx" version="1.0.0" />
+      <resx path="strings/FileDrop.1031.resx" version="1.0.0" />
+      <resx path="strings/FileDrop.1041.resx" version="1.0.0" />
+      <resx path="strings/FileDrop.1033.resx" version="1.0.0" />
+    </resources>
+
+    <!--
+      `required="false"`, and the difference from `true` is the whole design.
+
+      A required feature is a hard dependency: the maker is prompted for it and
+      the control is expected not to work without it. `Device.pickFile` is not
+      that here. It is the *best* of three ways in, and the other two — a drop
+      target and a hidden file input — are plain DOM that works on every host
+      there is. So the control asks the platform first, and falls back the
+      moment the promise rejects, which it does everywhere outside a real
+      device origin: `npm start`, the hub's demo sandbox, a canvas app in a
+      browser tab.
+
+      Compare `pcf-barcode-scanner`, which declares `Device.getBarcodeValue` as
+      required — correctly, because there is no non-device way to read a
+      barcode. Here there is, so declaring this required would ask makers for a
+      permission the control can do without.
+    -->
+    <feature-usage>
+      <uses-feature name="Device.pickFile" required="false" />
+    </feature-usage>
+  </control>
+</manifest>

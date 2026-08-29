@@ -1,0 +1,346 @@
+/*
+ * Every rule is scoped under the control's own class.
+ *
+ * A code component shares a document with the host app and with every other
+ * control on the form, so a bare `img { … }` here restyles the page it was
+ * dropped onto. The platform does not sandbox this for you.
+ */
+
+/*
+ * The palette, as Fluent's design tokens with literal fallbacks.
+ *
+ * A standard control cannot mount a `FluentProvider` — the provider is React
+ * and this is not — and the usual conclusion from that is that Fluent's styling
+ * is out of reach, so the control invents its own colours and ends up looking
+ * pasted onto the form. The conclusion is wrong. `FluentProvider` is what
+ * *emits* the theme as CSS custom properties, and a model-driven form already
+ * mounts one above every code component on the page. Nothing has to be mounted
+ * in order to read them.
+ *
+ * So the token wins where the host publishes it — the control then follows the
+ * app's theme *and its brand colour* with no code — and the literal carries the
+ * hosts that publish nothing, which includes canvas apps and PCFHub's demo
+ * harness. The fallbacks are Fluent's web light theme, taken from
+ * `@fluentui/tokens` rather than eyeballed: a value one step off on the neutral
+ * ramp is invisible alone and obvious beside the real thing.
+ */
+.FileDrop {
+    --FileDrop-background: var(--colorNeutralBackground3, #f5f5f5);
+    --FileDrop-background-hover: var(--colorNeutralBackground3Hover, #ebebeb);
+    --FileDrop-background-button: var(--colorNeutralBackground1, #ffffff);
+    --FileDrop-background-button-hover: var(--colorNeutralBackground1Hover, #f5f5f5);
+    --FileDrop-background-active: var(--colorBrandBackground2, #ebf3fc);
+    --FileDrop-background-disabled: var(--colorTransparentBackground, transparent);
+    --FileDrop-stroke: var(--colorNeutralStroke2, #e0e0e0);
+    --FileDrop-stroke-strong: var(--colorNeutralStroke1, #d1d1d1);
+    --FileDrop-stroke-disabled: var(--colorNeutralStrokeDisabled, #e0e0e0);
+    --FileDrop-stroke-focus: var(--colorCompoundBrandStroke, #0f6cbd);
+    --FileDrop-stroke-invalid: var(--colorPaletteRedBorder2, #d13438);
+    --FileDrop-foreground: var(--colorNeutralForeground1, #242424);
+    --FileDrop-foreground-secondary: var(--colorNeutralForeground2, #424242);
+    --FileDrop-foreground-placeholder: var(--colorNeutralForeground4, #707070);
+    --FileDrop-foreground-disabled: var(--colorNeutralForegroundDisabled, #bdbdbd);
+    --FileDrop-foreground-danger: var(--colorPaletteRedForeground1, #bc2f32);
+    --FileDrop-radius: var(--borderRadiusMedium, 4px);
+    --FileDrop-font-family: var(
+        --fontFamilyBase,
+        "Segoe UI",
+        "Segoe UI Web (West European)",
+        -apple-system,
+        BlinkMacSystemFont,
+        Roboto,
+        "Helvetica Neue",
+        sans-serif
+    );
+    --FileDrop-font-size: var(--fontSizeBase300, 14px);
+    --FileDrop-line-height: var(--lineHeightBase300, 20px);
+    --FileDrop-font-size-caption: var(--fontSizeBase200, 12px);
+    --FileDrop-line-height-caption: var(--lineHeightBase200, 16px);
+    --FileDrop-duration-faster: var(--durationFaster, 100ms);
+    --FileDrop-curve-ease: var(--curveEasyEase, cubic-bezier(0.33, 0, 0.67, 1));
+
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: var(--FileDrop-font-family);
+    color: var(--FileDrop-foreground);
+}
+
+/*
+ * The dark fallbacks, chosen from `fluentDesignLanguage.isDarkTheme` in
+ * `index.ts` rather than from `prefers-color-scheme`.
+ *
+ * The media query is the obvious hook and it answers the wrong question: a
+ * model-driven app carries its own theme and the operating system's setting
+ * says nothing about it, so an OS-dark machine on a light app would get #141414
+ * behind the form's white.
+ *
+ * Only the fallbacks change here. A host that emits the tokens is already
+ * handing over its own dark values through the `var()`, and this block never
+ * takes effect there.
+ */
+.FileDrop--dark {
+    --FileDrop-background: var(--colorNeutralBackground3, #141414);
+    --FileDrop-background-hover: var(--colorNeutralBackground3Hover, #292929);
+    --FileDrop-background-button: var(--colorNeutralBackground1, #292929);
+    --FileDrop-background-button-hover: var(--colorNeutralBackground1Hover, #3d3d3d);
+    --FileDrop-background-active: var(--colorBrandBackground2, #082338);
+    --FileDrop-stroke: var(--colorNeutralStroke2, #333333);
+    --FileDrop-stroke-strong: var(--colorNeutralStroke1, #666666);
+    --FileDrop-stroke-disabled: var(--colorNeutralStrokeDisabled, #424242);
+    --FileDrop-stroke-focus: var(--colorCompoundBrandStroke, #479ef5);
+    --FileDrop-stroke-invalid: var(--colorPaletteRedBorder2, #e37d80);
+    --FileDrop-foreground: var(--colorNeutralForeground1, #ffffff);
+    --FileDrop-foreground-secondary: var(--colorNeutralForeground2, #d6d6d6);
+    --FileDrop-foreground-placeholder: var(--colorNeutralForeground4, #999999);
+    --FileDrop-foreground-disabled: var(--colorNeutralForegroundDisabled, #5c5c5c);
+    --FileDrop-foreground-danger: var(--colorPaletteRedForeground1, #e37d80);
+}
+
+/*
+ * The drop target.
+ *
+ * A dashed border while the control is empty and a solid one once it holds
+ * something, because the dashes are the affordance: they are what says "this
+ * area takes a drop" without a sentence, and leaving them up around a file that
+ * is already there says it again to nobody.
+ */
+.FileDrop .FileDrop-zone {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacingVerticalXS, 4px);
+    box-sizing: border-box;
+    min-height: 132px;
+    padding: var(--spacingVerticalM, 12px) var(--spacingHorizontalM, 12px);
+    border: 1px dashed var(--FileDrop-stroke-strong);
+    border-radius: var(--FileDrop-radius);
+    background-color: var(--FileDrop-background);
+    text-align: center;
+    transition: background-color var(--FileDrop-duration-faster) var(--FileDrop-curve-ease);
+}
+
+.FileDrop--filled .FileDrop-zone {
+    border-style: solid;
+    border-color: var(--FileDrop-stroke);
+}
+
+/*
+ * Required, not belt-and-braces. `hidden` works by way of a UA rule
+ * `[hidden] { display: none }`, which any author `display` declaration beats on
+ * specificity — so the `display: flex` above would leave `zone.hidden = true`
+ * rendering an empty box where the field-level-security message should be the
+ * only thing on the form.
+ */
+.FileDrop .FileDrop-zone[hidden] {
+    display: none;
+}
+
+/*
+ * The state a file is being dragged over.
+ *
+ * Two changes rather than one: the fill tints *and* the border goes solid
+ * brand. Colour alone would say nothing in forced-colours mode, where every
+ * tint collapses to the same system keyword.
+ */
+.FileDrop--over .FileDrop-zone {
+    border-style: solid;
+    border-color: var(--FileDrop-stroke-focus);
+    background-color: var(--FileDrop-background-active);
+}
+
+.FileDrop .FileDrop-icon {
+    display: block;
+    width: 48px;
+    height: 48px;
+    color: var(--FileDrop-foreground-placeholder);
+}
+
+/*
+ * The preview is the file itself, so it gets room and keeps its aspect ratio.
+ * `object-fit: contain` rather than `cover`: a cropped preview of the thing
+ * somebody just attached is worse than a small one.
+ */
+.FileDrop .FileDrop-icon--preview {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 160px;
+    border-radius: var(--FileDrop-radius);
+    object-fit: contain;
+}
+
+.FileDrop .FileDrop-prompt {
+    margin: 0;
+    max-width: 100%;
+    font-size: var(--FileDrop-font-size);
+    line-height: var(--FileDrop-line-height);
+    color: var(--FileDrop-foreground);
+    /* A file name is arbitrary and often long; a canvas app puts controls in
+       genuinely narrow places. Breaking it is better than widening the form. */
+    overflow-wrap: anywhere;
+}
+
+.FileDrop .FileDrop-detail {
+    margin: 0;
+    font-size: var(--FileDrop-font-size-caption);
+    line-height: var(--FileDrop-line-height-caption);
+    color: var(--FileDrop-foreground-secondary);
+}
+
+.FileDrop .FileDrop-detail[hidden] {
+    display: none;
+}
+
+/* A row of its own, because the zone is a column: left as direct children the
+   buttons stack, and two stacked buttons read as two unrelated controls. */
+.FileDrop .FileDrop-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--spacingHorizontalS, 8px);
+    margin-top: var(--spacingVerticalXS, 4px);
+}
+
+/* Fluent's secondary button: white surface, neutral border, 32px tall — the
+   same height as the form's own fields, which is what keeps it from reading as
+   a foreign element. */
+.FileDrop .FileDrop-browse,
+.FileDrop .FileDrop-remove {
+    box-sizing: border-box;
+    min-height: 32px;
+    padding: 0 var(--spacingHorizontalM, 12px);
+    border: 1px solid var(--FileDrop-stroke-strong);
+    border-radius: var(--FileDrop-radius);
+    background-color: var(--FileDrop-background-button);
+    color: var(--FileDrop-foreground);
+    font-family: inherit;
+    font-size: var(--FileDrop-font-size);
+    line-height: var(--FileDrop-line-height);
+    font-weight: var(--fontWeightSemibold, 600);
+    cursor: pointer;
+}
+
+.FileDrop .FileDrop-browse:hover,
+.FileDrop .FileDrop-remove:hover {
+    background-color: var(--FileDrop-background-button-hover);
+}
+
+/* `:focus-visible` rather than `:focus`, so a click does not leave a ring
+   behind while a Tab still shows one. */
+.FileDrop .FileDrop-browse:focus-visible,
+.FileDrop .FileDrop-remove:focus-visible {
+    outline: 2px solid var(--FileDrop-stroke-focus);
+    outline-offset: 1px;
+}
+
+.FileDrop .FileDrop-remove[hidden] {
+    display: none;
+}
+
+/*
+ * Visually hidden rather than `display: none`.
+ *
+ * A `display: none` file input is not reliably clickable from script across
+ * browsers, and clicking it from script is the entire reason it exists. It is
+ * kept out of the tab order and out of the accessibility tree in `index.ts`
+ * instead, where the reason can be stated next to the decision.
+ */
+.FileDrop .FileDrop-picker {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+/*
+ * Disabled is a different surface, not a dimmer one. `opacity` over the enabled
+ * styling is the reflex and it is wrong twice: it drags the *text* below
+ * contrast along with the chrome, and it looks nothing like Fluent, which
+ * removes the fill and reveals the border.
+ */
+.FileDrop--disabled .FileDrop-zone,
+.FileDrop--disabled .FileDrop-zone:hover {
+    background-color: var(--FileDrop-background-disabled);
+    border-color: var(--FileDrop-stroke-disabled);
+}
+
+.FileDrop--disabled .FileDrop-prompt,
+.FileDrop--disabled .FileDrop-detail,
+.FileDrop--disabled .FileDrop-icon {
+    color: var(--FileDrop-foreground-disabled);
+}
+
+.FileDrop--disabled .FileDrop-browse,
+.FileDrop--disabled .FileDrop-remove {
+    border-color: var(--FileDrop-stroke-disabled);
+    background-color: var(--FileDrop-background-disabled);
+    color: var(--FileDrop-foreground-disabled);
+    cursor: not-allowed;
+}
+
+/* `mode.isVisible` is false. Canvas relies on this; model-driven hides the
+   section itself, so this is the cheap half of supporting both. */
+.FileDrop--hidden {
+    display: none;
+}
+
+/* The bound property reported `error`. */
+.FileDrop--invalid .FileDrop-zone:not(:focus-within) {
+    border-color: var(--FileDrop-stroke-invalid);
+}
+
+.FileDrop .FileDrop-message {
+    margin: var(--spacingVerticalXXS, 2px) 0 0;
+    font-family: inherit;
+    font-size: var(--FileDrop-font-size-caption);
+    line-height: var(--FileDrop-line-height-caption);
+    color: var(--FileDrop-foreground-danger);
+}
+
+.FileDrop .FileDrop-message[hidden] {
+    display: none;
+}
+
+/*
+ * Forced colours collapse every tint to one of a handful of system keywords, so
+ * anything carrying meaning by colour has to carry it by shape too. The
+ * drag-over state already changes the border from dashed to solid, which is why
+ * it still reads here.
+ */
+@media (forced-colors: active) {
+    .FileDrop .FileDrop-zone {
+        border-color: ButtonBorder;
+    }
+
+    .FileDrop--over .FileDrop-zone {
+        border-color: Highlight;
+    }
+
+    .FileDrop--disabled .FileDrop-zone,
+    .FileDrop--disabled .FileDrop-prompt,
+    .FileDrop--disabled .FileDrop-detail,
+    .FileDrop--disabled .FileDrop-browse,
+    .FileDrop--disabled .FileDrop-remove {
+        border-color: GrayText;
+        color: GrayText;
+    }
+}
+
+/*
+ * Shortened, not removed. The fill change is decoration; the state it indicates
+ * is not, so it still has to happen — it just stops fading into place.
+ */
+@media screen and (prefers-reduced-motion: reduce) {
+    .FileDrop .FileDrop-zone {
+        transition-duration: 0.01ms;
+    }
+}
