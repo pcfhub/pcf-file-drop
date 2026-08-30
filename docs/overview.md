@@ -12,6 +12,8 @@ Drag a file onto the control, or press **Browse**, and the file is written into
 the column the control is bound to. Nothing is uploaded anywhere: the file is
 read in the browser and stored in the column as a data URL.
 
+::image{src=media/screenshot.png alt="File Drop holding signed-contract.pdf, with Browse and Remove buttons" zoom}
+
 ## Why this one
 
 - **It binds a text column, because PCF cannot bind a File column.** The

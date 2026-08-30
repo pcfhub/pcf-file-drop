@@ -29,7 +29,11 @@
   },
   "media": {
     "logo": "media/logo.png",
-    "screenshots": []
+    "screenshots": [
+      "media/screenshot.png",
+      "media/screenshot-empty.png",
+      "media/screenshot-dark.png"
+    ]
   },
   "demo": {
     "fidelity": "limited",
