@@ -1,20 +1,34 @@
 <svg width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Template placeholder. The top face of the PCFHub mark on its own: one
-       component rather than the whole stack.
+  <!-- A file going down into the column that will hold it.
 
-       Geometry, ramp and inner diamond are the original's verbatim, shifted
-       down 19 so a face that sits at the top of the full mark is centred when
-       it stands alone. The gradient is declared in userSpaceOnUse, so its
-       coordinates move by the same 19; leaving them at the original 29 and 9
-       would slide the ramp off the shape.
+       The card is the form, the arrow is the drop, and the open tray is the
+       zone it lands in. It is the download glyph turned around: the tray is
+       what makes the direction "into this column" rather than "onto my disk".
+
+       The ramp is the PCFHub mark's own, verbatim, so this sits in the family rather
+       than beside it. Declared in userSpaceOnUse and spanning the whole 96
+       canvas, so the mark reads as one object lit from the top right.
+
+       Drawn for 32px. The tray is an open stroke rather than a filled shelf so
+       that the arrow can end inside it without the two merging into a single
+       blob at 24.
 
        Note: no double hyphen may appear in this comment, or the whole document
        fails to parse as XML. -->
   <defs>
-    <linearGradient id="mark-top" x1="8" y1="48" x2="88" y2="28" gradientUnits="userSpaceOnUse">
+    <linearGradient id="file-drop-ramp" x1="6" y1="82" x2="90" y2="14" gradientUnits="userSpaceOnUse">
       <stop stop-color="#A684FF"/><stop offset="0.6" stop-color="#7C86FF"/><stop offset="1" stop-color="#00BCFF"/>
     </linearGradient>
   </defs>
-  <path d="M48 28 88 48 48 68 8 48Z" fill="url(#mark-top)"/>
-  <path d="M48 41.5 61 48 48 54.5 35 48Z" fill="#F8FAFC" fill-opacity="0.92"/>
+  <!-- The form. -->
+  <rect x="6" y="10" width="84" height="76" rx="18" fill="url(#file-drop-ramp)"/>
+
+  <!-- The file, dropping. -->
+  <path d="M48 24 V52" stroke="#F8FAFC" stroke-width="9" stroke-linecap="round"/>
+  <path d="M36 42 L48 54 L60 42" stroke="#F8FAFC" stroke-width="9"
+        stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- The zone it lands in. -->
+  <path d="M27 62 V70 H69 V62" stroke="#F8FAFC" stroke-width="9"
+        stroke-linecap="round" stroke-linejoin="round" fill="none"/>
 </svg>
