@@ -4,6 +4,7 @@
   "name": "File Drop",
   "tagline": "Drop a file onto a form and keep it in the column.",
   "category": "input",
+  "hosts": ["canvas", "model-driven"],
   "tags": [
     "file",
     "upload",
