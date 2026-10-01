@@ -3,6 +3,7 @@
   "slug": "pcf-file-drop",
   "name": "File Drop",
   "tagline": "Drop a file onto a form and keep it in the column.",
+  "summary": "Drag a file onto the control, or press **Browse**, and the file is stored in the bound column. Nothing is uploaded anywhere else: the file is read in the browser and kept in a multi-line text column as a data URL, because a code component cannot bind a File column.\n\nA canvas `Image` control can bind the same column directly. On a phone, Browse opens the device's own picker.",
   "category": "input",
   "hosts": ["canvas", "model-driven"],
   "tags": [
