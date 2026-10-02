@@ -6,13 +6,14 @@ order: 7
 
 # Limitations
 
-- **It cannot use a File or Image column, and no PCF control can.** The manifest
-  schema reference states it under the `type` element — *"At this time File
-  columns are not supported"* — and `ImageObject` is documented as canvas-only.
-  `context.webAPI` offers `create`, `retrieve`, `retrieveMultiple`, `update` and
-  `delete`, none of which can PATCH a file attribute. So the file goes into a
-  text column as a data URL. If your data model already uses a File column, this
-  control is the wrong tool.
+- **It writes a text column, not a File or Image column.** No PCF control can
+  *bind* a File column — the manifest schema reference states it under the
+  `type` element, *"At this time File columns are not supported"* — so File
+  Drop stores the file in a text column as a data URL, which also works in
+  canvas apps. If your data model already uses a File or Image column, use
+  [File Preview](https://pcfhub.dev/components/pcf-file-preview) instead: it
+  sits beside the column on a model-driven form and shows, replaces and
+  removes the file in it.
 
 - **About 768 KB is the hard ceiling.** A `Multiple` column holds 1,048,576
   characters, base64 costs a third on top, and the `data:…;base64,` prefix a

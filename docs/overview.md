@@ -52,6 +52,8 @@ defaults to 512 so that a file is refused up front rather than rejected by the
 platform on save, which is a much worse failure: the error arrives after the
 file has been read and says nothing about size.
 
-For anything larger, use the out-of-the-box file column control. This one is for
+For anything larger, use a File column — with the out-of-the-box control, or
+[File Preview](https://pcfhub.dev/components/pcf-file-preview) to show the
+file on the form. This one is for
 signatures, logos, scanned receipts, small attachments — things measured in
 kilobytes.

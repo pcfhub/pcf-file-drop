@@ -8,11 +8,16 @@ order: 8
 
 ## Why can't I bind it to my File column?
 
-Because no PCF control can. The manifest schema reference says it under the
-`type` element — *"At this time File columns are not supported"* — and there is
-no `of-type="File"` in the enumeration to declare. Bind a **multiple lines of
-text** column instead and see [Model-driven apps](model-driven.md) for how large
-to make it.
+Because no PCF control can bind one. The manifest schema reference says it
+under the `type` element — *"At this time File columns are not supported"* —
+and there is no `of-type="File"` in the enumeration to declare. Bind a
+**multiple lines of text** column instead and see
+[Model-driven apps](model-driven.md) for how large to make it.
+
+If the file has to live in a File or Image column, use
+[File Preview](https://pcfhub.dev/components/pcf-file-preview): it is placed
+beside the column on a model-driven form and reaches the file through the
+record.
 
 ## Why does it say the file is too large when the column has room?
 
