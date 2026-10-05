@@ -8,6 +8,10 @@ order: 1
 
 Drop a file onto a form and keep it in the column.
 
+:::callout{type=warning}
+**Reference example · built with AI.** This control was written with AI (Claude) and tested on a live Dataverse form; its code has not been reviewed line by line. It is published as a worked example and is not maintained — read the source and [SPEC.md](https://github.com/pcfhub/pcf-file-drop/blob/main/SPEC.md) (what was measured on the form) before you use it. Fixes are not guaranteed.
+:::
+
 Drag a file onto the control, or press **Browse**, and the file is written into
 the column the control is bound to. Nothing is uploaded anywhere: the file is
 read in the browser and stored in the column as a data URL.
