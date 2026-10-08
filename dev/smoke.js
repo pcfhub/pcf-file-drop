@@ -296,9 +296,7 @@ check(
 
 check(
     'stroked with currentColor, so the stylesheet decides the colour',
-    empty
-        .find('.FileDrop-emblem')
-        .querySelectorAll('path')
+    Array.from(empty.find('.FileDrop-emblem').querySelectorAll('path'))
         .every((path) => path.getAttribute('stroke') === 'currentColor'),
 );
 
